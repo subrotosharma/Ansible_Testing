@@ -3,7 +3,7 @@ resource "aws_vpc" "default" {
   enable_dns_hostnames = true
   tags = {
     Name              = var.vpc_name
-    Owner             = "Saikiran Pinapathruni"
+    Owner             = "Subroto Sharma"
     environment       = local.new_environment
     Terraform-Managed = "Yes"
     ProjectID         = local.projid
