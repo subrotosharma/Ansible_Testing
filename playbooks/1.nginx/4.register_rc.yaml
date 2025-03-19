@@ -1,0 +1,32 @@
+---
+- name: Check & Install AWS CLI
+  hosts: pvt
+  gather_facts: yes
+  become: yes
+  become_user: root
+  tasks:
+  - name: Check AWS CLI exists
+    shell: aws --version
+    register: aws_version_output
+    ignore_errors: yes
+
+  - name: Print RC
+    debug:
+      msg: "{{ aws_version_output.rc }}"
+
+  - name: Install Dependencies
+    shell: apt update && apt install -y unzip
+    when: aws_version_output.rc != 0
+
+  - name: Install AWS CLI
+    shell: |
+      curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      unzip awscliv2.zip
+      sudo ./aws/install
+    when: aws_version_output.rc != 0
+
+  - name: Check AWS CLI exists Again
+    shell: aws --version
+    when: aws_version_output.rc != 0
+
+####
