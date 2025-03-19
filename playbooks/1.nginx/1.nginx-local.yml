@@ -6,7 +6,7 @@
   become_user: root
   #serial: 1
   vars:
-    AWS_ACCOUNT: "211125710812"
+    AWS_ACCOUNT: "010928204458"
   tasks:
     - name: Print Variable
       debug:
