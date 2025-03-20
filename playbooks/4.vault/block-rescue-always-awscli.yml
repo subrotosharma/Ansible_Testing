@@ -1,0 +1,46 @@
+---
+- name: Play for Testing Block, Rescue, Always with AWS CLI
+  hosts: pvt
+  gather_facts: yes
+  become: yes
+  become_user: root
+  #serial: 1
+  tasks:
+    - name: Testing The Ansible Blocks
+      #https://www.golinuxcloud.com/ansible-block-rescue-always/ If blocks tasks fails then rescue task will work in the below.
+      block:
+        - name: Perform apt update
+          shell: apt update
+        - name: Check if Unzip Exists
+          shell: unzip
+        - name: Check if jq Exists
+          shell: jq --help
+        - name: Check if AWS Exists
+          shell: aws --version
+      when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '24.04'
+
+      # Rescue tasks execute if any of the block task fails in above section.
+      rescue:
+        - name: Install UNZIP
+          apt: >
+            name=unzip
+            state=latest
+        - name: Install JQ
+          apt: >
+            name=jq
+            state=latest
+        - name: Install AWS
+          shell: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+
+      always:
+        - name: Run This Always
+          shell: ls -al
+          register: file_list
+        - name: Print Files
+          debug:
+            msg: "{{file_list.stdout}}"
+        - name: Check AWS CLI Version
+          shell: aws --version

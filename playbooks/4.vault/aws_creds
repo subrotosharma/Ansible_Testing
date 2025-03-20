@@ -1,0 +1,4 @@
+[default]
+aws_access_key_id=AAAAAAAAA
+aws_secret_access_key=BBBBBBBBBBBBBBBBB
+region=us-east-1

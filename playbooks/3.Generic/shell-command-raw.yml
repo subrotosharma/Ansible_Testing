@@ -1,0 +1,51 @@
+---
+- name: Testing SHELL COMMAND & RAW
+  hosts: testserver01
+  become: true
+  become_user: root
+  tasks:
+    - name: Run SHELL Module
+      shell: >
+        echo "Welcome
+        To DevSecOps By Saikiran Pinapathruni ${HOME}"
+      tags:
+        - shell
+
+    - name: Run  Env Using SHELL Variables
+      shell: env && df -h && free
+      tags:
+        - shell
+
+    - name: Run COMMAND Module
+      command: >
+        echo "To DevSecOps By Saikiran Pinapathruni ${HOME}"
+      tags:
+        - command
+    - name: Run  Env Using COMMAND Variables
+      command: env && df -h && free
+      tags:
+        - command
+
+    - name: Run RAW Module #Very simple, If you do not have Python
+      raw: >
+        echo "To DevSecOps By Saikiran Pinapathruni ${HOME}"
+      tags:
+        - raw
+
+    - name: Run  Env Using RAW Variables
+      raw: env && df -h && free
+      tags:
+        - raw
+# Interview difference between shell command and raw
+# ***command : ansible-playbook -i invfile playbooks/3.generic/shell-command-raw.yml --tags raw ***
+
+##GPT SUPER ANSWER##
+# The `raw` module in Ansible is used to run commands directly on remote systems without needing Python or any other software installed on them. This can be particularly useful in scenarios like:
+
+# 1. **Setting Up New Servers**: When a server is completely fresh and doesn’t even have Python installed (which Ansible usually needs to operate), you can use the `raw` module to install Python or other required packages. Once Python is installed, Ansible can then use other modules to manage the server more effectively.
+
+# 2. **Running Quick Commands**: For simple, quick tasks or commands that don’t require any Ansible-specific functionality (like error checking or detailed output), you can use `raw` for efficiency.
+
+# 3. **Managing Non-Python Systems**: If you have to manage network devices or legacy systems that don’t have Python, `raw` lets you still issue commands to them as long as they support SSH.
+
+# In short, `raw` is a lightweight way to interact with systems that lack Ansible's typical requirements or when you need a direct, quick command run.
