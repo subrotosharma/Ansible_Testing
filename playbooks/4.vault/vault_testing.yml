@@ -18,21 +18,11 @@
       6364
 
   tasks:
-    - name: Ensure Required Packages are Installed (pip3, jq)
+    - name: Install Required Packages (jq, passlib)
       package:
         name:
-          - python3-pip
           - jq
-        state: present
-
-    - name: Ensure pip is available as pip3
-      command: ln -sf /usr/bin/pip3 /usr/bin/pip
-      args:
-        creates: /usr/bin/pip
-
-    - name: Ensure passlib is installed for password hashing
-      pip:
-        name: passlib
+          - python3-passlib
         state: present
 
     - name: Create .aws folder
