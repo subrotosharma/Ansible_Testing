@@ -1,5 +1,5 @@
 # Run the playbook with:
-# ansible-playbook -i invfile Playbooks/vault_testing.yml -vv --ask-vault-pass
+# ansible-playbook -i invfile playbooks/4.vault/vault_testing.yml --ask-vault-pass -v
 
 ---
 - name: Configure AWS Credentials and Run AWS CLI Commands
@@ -43,7 +43,7 @@
         mode: "0600"
 
     - name: Verify AWS CLI authentication
-      command: aws sts get-caller-identity
+      command: aws sts get-caller-identity --output json
       register: aws_identity
       ignore_errors: yes
 
@@ -52,19 +52,23 @@
         var: aws_identity.stdout_lines
 
     - name: Check S3 Buckets
-      command: aws s3 ls
+      command: aws s3 ls --output json
       register: buckets
       ignore_errors: yes
 
-    - name: Print Bucket Names
+    - name: Print S3 Bucket Names
       debug:
         var: buckets.stdout_lines
 
-    - name: Get VPCs
-      command: aws ec2 describe-vpcs | jq -r ".Vpcs[].VpcId"
-      register: vpcs
+    - name: Get VPCs from AWS CLI
+      command: aws ec2 describe-vpcs --output json
+      register: vpcs_raw
       ignore_errors: yes
+
+    - name: Extract VPC IDs
+      set_fact:
+        vpc_ids: "{{ vpcs_raw.stdout | from_json | json_query('Vpcs[].VpcId') }}"
 
     - name: Print VPC IDs
       debug:
-        var: vpcs.stdout_lines
+        var: vpc_ids
