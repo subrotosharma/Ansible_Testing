@@ -19,6 +19,10 @@
     - name: Create .aws folder
       shell: mkdir -p /root/.aws
       ignore_errors: yes
+    - name: Ensure passlib is installed for password hashing
+      pip:
+        name: passlib
+        state: present
     - name: Copy Encrypted File To /tmp
       copy:
         src: /tmp/{{item}} #This Encrypted File Must Be Created Prior To Running The Playbook.
