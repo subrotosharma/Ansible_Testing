@@ -1,6 +1,8 @@
-#ansible-playbook -i invfile Playbooks/vault_testing.yml -vv --ask-vault-pass
+# Run the playbook with:
+# ansible-playbook -i invfile Playbooks/vault_testing.yml -vv --ask-vault-pass
+
 ---
-- name: Run AWS Cli Commands On All Servers
+- name: Run AWS CLI Commands On All Servers
   hosts: pvt
   gather_facts: yes
   become: yes
@@ -16,67 +18,96 @@
       6364
 
   tasks:
-    - name: Create .aws folder
-      shell: mkdir -p /root/.aws
-      ignore_errors: yes
+    - name: Ensure Required Packages are Installed (pip3, jq)
+      package:
+        name:
+          - python3-pip
+          - jq
+        state: present
+
+    - name: Ensure pip is available as pip3
+      command: ln -sf /usr/bin/pip3 /usr/bin/pip
+      args:
+        creates: /usr/bin/pip
+
     - name: Ensure passlib is installed for password hashing
       pip:
         name: passlib
         state: present
-    - name: Copy Encrypted File To /tmp
+
+    - name: Create .aws folder
+      file:
+        path: /root/.aws
+        state: directory
+        owner: root
+        group: root
+        mode: "0700"
+
+    - name: Copy Encrypted Files to /tmp
       copy:
-        src: /tmp/{{item}} #This Encrypted File Must Be Created Prior To Running The Playbook.
-        dest: /tmp/{{item}}
+        src: "/tmp/{{ item }}"  # Ensure these files exist before running the playbook.
+        dest: "/tmp/{{ item }}"
         owner: root
         group: root
         mode: "0600"
-      with_items:
+      loop:
         - aws_creds
         - tls.key
         - tls.crt
-    - name: Copy Encrypted Credentials File To .aws folder
+
+    - name: Copy AWS Credentials File to .aws folder
       copy:
-        src: /tmp/aws_creds #This Encrypted File Must Be Created Prior To Running The Playbook.
+        src: /tmp/aws_creds
         dest: /root/.aws/credentials
         owner: root
         group: root
         mode: "0600"
+
     - name: Check S3 Buckets
-      shell: aws s3 ls | cut -d " " -f 3
+      command: aws s3 ls
       register: buckets
-    - name: Print Bucket Name
+
+    - name: Print Bucket Names
       debug:
-        var: buckets
-    - name: Get VPCS
-      shell: aws ec2 describe-vpcs | jq ".Vpcs[].VpcId" -r
+        msg: "{{ buckets.stdout_lines }}"
+
+    - name: Get VPCs
+      command: aws ec2 describe-vpcs | jq -r ".Vpcs[].VpcId"
       register: vpcs
-    - name: Print VPC ID
+
+    - name: Print VPC IDs
       debug:
-        var: vpcs
-    - name: Creating admin "{{item}}"
+        msg: "{{ vpcs.stdout_lines }}"
+
+    - name: Create Admin Users
       user:
-        name: "{{item}}"
+        name: "{{ item }}"
         state: present
-        comment: Admin User "{{item}}"
+        comment: "Admin User {{ item }}"
         groups: root
         shell: /bin/bash
         group: sudo
-        password: "{{ '%s' | format(user_password) | regex_replace('\n', '') | password_hash('sha512') }}"
+        password: "{{ user_password | regex_replace('\n', '') | password_hash('sha512') }}"
         password_expire_min: 1
-      with_items:
+      loop:
         - Avinash
         - Saikiran
         - Gnane
-    - name: Replace Password Authentication To Yes
+
+    - name: Enable Password Authentication in SSH
       ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config
         regexp: "^PasswordAuthentication no"
-        line: PasswordAuthentication yes
+        line: "PasswordAuthentication yes"
         backup: yes
       notify:
         - Restart SSH Service
+
   handlers:
     - name: Restart SSH Service
-      shell: service sshd restart
-    - name: Restart elastic-agent
-      shell: sudo heartbeat setup && sudo service heartbeat-elastic start
+      service:
+        name: sshd
+        state: restarted
+
+    - name: Restart Elastic Agent
+      command: sudo heartbeat setup && sudo service heartbeat-elastic start
