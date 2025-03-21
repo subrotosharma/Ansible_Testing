@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="style.css">
+    <title>Color Game Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+        header {
+            background-color: #ff9800;
+            padding: 20px;
+            color: white;
+        }
+        .content {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .server-info h1, .server-info h3 {
+            margin: 10px 0;
+        }
+        .friends-list {
+            margin-top: 20px;
+        }
+        .friends-list h3 {
+            color: #007acc;
+        }
+        .divider {
+            border: 0;
+            height: 3px;
+            background-color: #ff9800;
+            margin: 20px auto;
+            width: 80%;
+        }
+        #smallcont, #container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        #try1 {
+            padding: 10px 20px;
+            background-color: #ff9800;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .square {
+            width: 50px;
+            height: 50px;
+            background-color: #007acc;
+            margin: 5px;
+            display: inline-block;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>{{ custom_heading }}</h1>
+    <p>{{ custom_para }}</p>
+</header>
+
+<div class="content">
+    <div class="server-info">
+        <h3>AWS Account: {{ aws_account }}</h3>
+    </div>
+
+    <hr class="divider">
+
+
+<div id="smallcont">
+    <div id="try1">Let's Play</div>
+</div>
+
+<div id="container">
+    <div class="square"></div>
+    <div class="square"></div>
+    <div class="square"></div>
+    <div class="square"></div>
+    <div class="square"></div>
+    <div class="square"></div>
+</div>
+
+<script type="text/javascript" src="scorekeeper.js"></script>
+
+</body>
+</html>
